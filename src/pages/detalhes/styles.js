@@ -36,5 +36,23 @@ export default StyleSheet.create({
     participanteNome:{
         fontWeight: 'bold',
         textAlign: 'left',
-    }
+    },
+    iconeRemover:{
+        marginLeft:'auto',
+    },
+    menu:{
+        padding:10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+    },
+    menuIcones:{
+        flexDirection:'row',
+        justifyContent:'space-around'
+
+    },
+    horizontal: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        padding: 10
+      }
 })

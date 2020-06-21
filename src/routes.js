@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 const AppStack = createStackNavigator();
 
 import Login from './pages/login';
+import Register from './pages/register';
 import Grupos from './pages/grupos';
 import Detalhes from './pages/detalhes';
 
@@ -13,6 +14,7 @@ export default function Routes(){
         <NavigationContainer>
             <AppStack.Navigator screenOptions={{ headerShown: false}}>
                 <AppStack.Screen name="Login" component={Login} />
+                <AppStack.Screen name="Register" component={Register} />
                 <AppStack.Screen name="Grupos" component={Grupos} />
                 <AppStack.Screen name="Detalhes" component={Detalhes} />
             </AppStack.Navigator>

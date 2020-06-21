@@ -1,20 +1,50 @@
-import React from 'react';
+import React, {useState ,useEffect} from 'react';
 import { useNavigation} from '@react-navigation/native'
-import { View, FlatList, Text, TouchableOpacity } from 'react-native';
+import { View, FlatList, Text, TouchableOpacity, AsyncStorage, ActivityIndicator  } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
+import api from '../../services/api';
 
 import styles from './styles';
 
 export default function Grupos(){
     const navigation = useNavigation();
+    const [ gruposusuario, setGruposUsuario] = useState([]);
+    const [ token, setToken] = useState('');
+    const [user, setUser] = useState('');
+    const [ spinner, setSpinner] =useState(false);
 
-    function navigateToDetais(){
-        navigation.navigate('Detalhes');
+    function navigateToDetais(id){
+        navigation.navigate('Detalhes', {id});
     };
-    function navigateToLogin(){
+    async function navigateToLogin(){
+        await AsyncStorage.clear();
         navigation.navigate('Login');
     };
+    
+    async function getStorage(){
+        const t = await AsyncStorage.getItem('token');
+        const u = await AsyncStorage.getItem('nome');
+        setToken(t);
+        setUser(u);
+    }
+    
+    async function getGrupos(){
+        setSpinner(true);
+        const config= {headers: {Authorization : `Bearer ${token}`}};
+        try {
+            const response = await api.get('gruposusuario', config);
+            setGruposUsuario(response.data);
+        } catch (error) {
+        }
+        setSpinner(false);
+    };
+
+    useEffect(() => {
+        getGrupos();
+        getStorage();
+    },[token]);
+
 
     return(
         <View style={styles.container}>
@@ -23,32 +53,37 @@ export default function Grupos(){
                     <FontAwesome name='sign-out' size={25} color="#FFFFFF" />
                 </TouchableOpacity> 
                 <Text style={styles.usuario}>
-                    Olá usuario!
+                    Olá {user}!
                 </Text>
                 <Text style={styles.total}>
-                    Total de 0 grupos
+                    Total de {gruposusuario.length} grupos
                 </Text>
             </View>
+            {spinner &&
+                <View style={[styles.header, styles.horizontal]}>
+                    <ActivityIndicator size="large" color="#FFFFFF" />
+                </View>
+            }
 
             <FlatList 
                 style={styles.ListaGrupos}
-                data={[1,2,3,4,5,6]}
-                keyExtractor={grupos => String(grupos)}
+                data={gruposusuario}
+                keyExtractor={group => String(group._id)}
                 showsVerticalScrollIndicator={false}
-                renderItem={() => (
-                    <TouchableOpacity onPress={navigateToDetais}>
+                renderItem={({item:group}) => (
+                    <TouchableOpacity onPress={() => navigateToDetais(group._id)}>
                         <View style={styles.grupo}>
-                            <Text style={styles.grupoNome}>Ano Novo</Text>
-                            <Text style={styles.data}>Sorteio: 31/12/2020</Text>
-                            <Text style={styles.data}>Status: Em Aberto</Text>
-                            <Text style={styles.data}>Criado por Wellington</Text>
+                            <Text style={styles.grupoNome}>{group.nome}</Text>
+                            <Text style={styles.data}>Sorteio: {group.dataSorteio}</Text>
+                            <Text style={styles.data}>Status: {group.status}</Text>
+                            <Text style={styles.data}>Criado por {group.criadoPor}</Text>
 
                         </View>
                     </TouchableOpacity>
 
 
                 )}    
-            />
+            />  
 
 
 
