@@ -7,7 +7,11 @@ export default StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: Constants.statusBarHeight + 20,
         backgroundColor: '#7159C1',
-        paddingBottom:30,
+    },
+    navegacao:{
+        flexDirection:'row',
+        justifyContent:'space-around',
+        padding: 15
     },
     usuario:{
         flexDirection: 'row',
@@ -50,9 +54,4 @@ export default StyleSheet.create({
         justifyContent:'space-around'
 
     },
-    horizontal: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        padding: 10
-      }
 })

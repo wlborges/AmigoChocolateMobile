@@ -1,9 +1,10 @@
 import React, {useState ,useEffect} from 'react';
 import { useNavigation, useRoute} from '@react-navigation/native'
-import { View, FlatList, Text, TouchableOpacity, AsyncStorage, ActivityIndicator } from 'react-native';
+import { View, FlatList, Text, TouchableOpacity, AsyncStorage, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import api from '../../services/api';
 import styles from './styles';
+import { color } from 'react-native-reanimated';
 
 export default function Grupos(){
     const navigation = useNavigation();
@@ -15,12 +16,20 @@ export default function Grupos(){
     const [ ocultaAmigo, setOcultaAmigo] = useState(true);
     const [ atualizar, setAtualizar] = useState(false);
     const [ spinner, setSpinner] =useState(false);
+    const [ apagar, setApagar] = useState(false);
 
     const rotas = useRoute();
     const id = rotas.params.id;
-    function navigationBack(){
-        navigation.goBack();
-    }
+    async function logout(){
+        await AsyncStorage.clear();
+        navigation.navigate('Login');
+    };
+    async function newGrupo(){
+        navigation.navigate('NewGrupo');
+    };
+    async function navigateToHome(){
+        navigation.navigate('Grupos');
+    };
     async function getStorage(){
         const t = await AsyncStorage.getItem('token');
         const u = await AsyncStorage.getItem('nome');
@@ -34,9 +43,7 @@ export default function Grupos(){
         setSpinner(true);
         const config= {headers: {Authorization : `Bearer ${token}`}};
         try {
-            console.log("chamando api");
             const response = await api.get('grupo/'+ id, config);
-            console.log("OK");
             setGruposUsuario(response.data);
         } catch (error) {
         }
@@ -47,7 +54,6 @@ export default function Grupos(){
         const config= {headers: {Authorization : `Bearer ${token}`}};
         try {
             const response = await api.get('grupo/sorteio/'+ id, config);
-            setGruposUsuario(response.data);
             setAtualizar(!atualizar);
         } catch (error) {
         }
@@ -56,12 +62,39 @@ export default function Grupos(){
     async function desfazerSorteio(_id){
         setSpinner(true);
         const config= {headers: {Authorization : `Bearer ${token}`}};
-        const data = { _id}
+        const data = {_id}
         try {
             const response = await api.post('grupo/sorteio', data, config);
-            setGruposUsuario(response.data);
             setAtualizar(!atualizar);
         } catch (error) {
+        }
+        setSpinner(false);
+    };
+    async function removeGrupo(_id){
+        setSpinner(true);
+        Alert.alert("Apagar", "Deseja apagar",
+            [
+                {
+                    text:"Sim", 
+                    onPress:() => setApagar(true)
+                },
+                {
+                    text:"Não",
+                    onPress:() => setApagar(false),
+                    style:'cancel'
+                 }
+            ],
+            {cancelable:false}
+        );
+        if(apagar){
+            setApagar(false);
+            const config= {headers: {Authorization : `Bearer ${token}`}};
+            try {
+                const response = await api.delete('grupo/'+ _id, config);
+                setSpinner(false);
+                navigateToHome();
+            } catch (error) {
+            }
         }
         setSpinner(false);
     };
@@ -77,7 +110,7 @@ export default function Grupos(){
                 <Text style={styles.usuario}>
                     Olá {user}!
                 </Text>
-                <TouchableOpacity onPress={navigationBack}>
+                <TouchableOpacity onPress={navigateToHome}>
                     <FontAwesome name='arrow-left' size={20} color="#FFFFFF" />
                 </TouchableOpacity>
             </View>
@@ -102,7 +135,7 @@ export default function Grupos(){
             <View style={styles.menu}>
                     <View style={styles.menuIcones}>
                         {(gruposusuario.status === "Em Aberto") &&
-                            <TouchableOpacity onPress={navigationBack}>
+                            <TouchableOpacity onPress={() => {}}>
                                 <FontAwesome name='user-plus' size={20} color="#037D25" />
                             </TouchableOpacity>
                         }
@@ -126,7 +159,7 @@ export default function Grupos(){
                                 <FontAwesome name='undo' size={20} color="#000000" />
                             </TouchableOpacity>
                         }
-                        <TouchableOpacity onPress={navigationBack}>
+                        <TouchableOpacity onPress={() => removeGrupo(gruposusuario._id)}>
                             <FontAwesome name='trash' size={20} color="#B32923" />
                         </TouchableOpacity>
                     </View>
@@ -143,7 +176,7 @@ export default function Grupos(){
                     <Text style={styles.participanteNome}>{participante.nome}</Text>
                     <Text style={styles.data}>{participante.email}</Text>
                     {(gruposusuario.status === "Em Aberto") &&
-                        <TouchableOpacity onPress={navigationBack}>
+                        <TouchableOpacity onPress={() => {}}>
                             <FontAwesome style={styles.iconeRemover} name='user-times' size={20} color='#B32923' />
                         </TouchableOpacity>
                     }
@@ -151,6 +184,21 @@ export default function Grupos(){
                 </View>
                 )}    
             />
+
+            <View style={styles.navegacao}>
+                <TouchableOpacity onPress={navigateToHome}>
+                    <FontAwesome name='home' size={25} color="#FFFFFF" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
+                    <FontAwesome name='user-circle' size={25} color="#FFFFFF" />
+                </TouchableOpacity> 
+                <TouchableOpacity onPress={newGrupo}>
+                    <FontAwesome name='plus' size={25} color="#FFFFFF" />
+                </TouchableOpacity>  
+                <TouchableOpacity onPress={logout}>
+                    <FontAwesome name='sign-out' size={25} color="#FFFFFF" />
+                </TouchableOpacity>  
+            </View>
         </View>
     )
 }

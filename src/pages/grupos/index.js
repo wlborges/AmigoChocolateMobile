@@ -13,13 +13,17 @@ export default function Grupos(){
     const [ token, setToken] = useState('');
     const [user, setUser] = useState('');
     const [ spinner, setSpinner] =useState(false);
-
+    const [ atualizar, setAtualizar] = useState(false);
+    
     function navigateToDetais(id){
         navigation.navigate('Detalhes', {id});
     };
-    async function navigateToLogin(){
+    async function logout(){
         await AsyncStorage.clear();
         navigation.navigate('Login');
+    };
+    async function newGrupo(){
+        navigation.navigate('NewGrupo');
     };
     
     async function getStorage(){
@@ -28,10 +32,11 @@ export default function Grupos(){
         setToken(t);
         setUser(u);
     }
+    const config= {headers: {Authorization : `Bearer ${token}`}};
     
     async function getGrupos(){
         setSpinner(true);
-        const config= {headers: {Authorization : `Bearer ${token}`}};
+        
         try {
             const response = await api.get('gruposusuario', config);
             setGruposUsuario(response.data);
@@ -43,15 +48,13 @@ export default function Grupos(){
     useEffect(() => {
         getGrupos();
         getStorage();
-    },[token]);
+    },[token, atualizar]);
 
 
     return(
         <View style={styles.container}>
+            
             <View style={styles.header}>
-                <TouchableOpacity onPress={navigateToLogin}>
-                    <FontAwesome name='sign-out' size={25} color="#FFFFFF" />
-                </TouchableOpacity> 
                 <Text style={styles.usuario}>
                     Olá {user}!
                 </Text>
@@ -80,13 +83,24 @@ export default function Grupos(){
 
                         </View>
                     </TouchableOpacity>
-
-
                 )}    
-            />  
+            /> 
 
-
+            <View style={styles.navegacao}>
+                <TouchableOpacity onPress={() => setAtualizar(!atualizar)}>
+                    <FontAwesome name='home' size={25} color="#FFFFFF" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => {}}>
+                    <FontAwesome name='user-circle' size={25} color="#FFFFFF" />
+                </TouchableOpacity> 
+                <TouchableOpacity onPress={newGrupo}>
+                    <FontAwesome name='plus' size={25} color="#FFFFFF" />
+                </TouchableOpacity>  
+                <TouchableOpacity onPress={logout}>
+                    <FontAwesome name='sign-out' size={25} color="#FFFFFF" />
+                </TouchableOpacity>  
+            </View>
 
         </View>
-    )
+    );
 }
