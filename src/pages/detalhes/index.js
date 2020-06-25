@@ -1,6 +1,6 @@
 import React, {useState ,useEffect} from 'react';
 import { useNavigation, useRoute} from '@react-navigation/native'
-import { View, FlatList, Text, TouchableOpacity, AsyncStorage, ActivityIndicator, Alert } from 'react-native';
+import { View, FlatList, Text, TouchableOpacity, AsyncStorage, ActivityIndicator, Alert, TextInput } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import api from '../../services/api';
 import styles from './styles';
@@ -17,6 +17,8 @@ export default function Grupos(){
     const [ atualizar, setAtualizar] = useState(false);
     const [ spinner, setSpinner] =useState(false);
     const [ apagar, setApagar] = useState(false);
+    const [ boxAdd, setBoxAdd] = useState(false);
+    const [ emailParticipante, setEmailParticipante] = useState('');
 
     const rotas = useRoute();
     const id = rotas.params.id;
@@ -70,6 +72,41 @@ export default function Grupos(){
         }
         setSpinner(false);
     };
+
+    async function addParticipante(email){
+        setSpinner(true);
+        const config= {headers: {Authorization : `Bearer ${token}`}};
+        const data ={
+            _id : gruposusuario._id,
+            email
+        };
+            try {
+                const response = await api.put('grupo/participante', data, config);
+                setEmailParticipante('');
+                setSpinner(false);
+                setBoxAdd(false);
+                setAtualizar(!atualizar);
+            } catch (error) {
+            }
+        setSpinner(false);
+    }
+    async function removeParticipante(email){
+        setSpinner(true);
+        const config= {headers: {Authorization : `Bearer ${token}`}};
+        const data ={
+            _id : gruposusuario._id,
+            email
+        };
+            try {
+                const response = await api.post('grupo/participante', data, config);
+                setEmailParticipante('');
+                setSpinner(false);
+                setAtualizar(!atualizar);
+            } catch (error) {
+            }
+        setSpinner(false);
+    }
+
     async function removeGrupo(_id){
         setSpinner(true);
         Alert.alert("Apagar", "Deseja apagar",
@@ -93,6 +130,7 @@ export default function Grupos(){
                 const response = await api.delete('grupo/'+ _id, config);
                 setSpinner(false);
                 navigateToHome();
+                setAtualizar(!atualizar);
             } catch (error) {
             }
         }
@@ -135,7 +173,7 @@ export default function Grupos(){
             <View style={styles.menu}>
                     <View style={styles.menuIcones}>
                         {(gruposusuario.status === "Em Aberto") &&
-                            <TouchableOpacity onPress={() => {}}>
+                            <TouchableOpacity onPress={() => setBoxAdd(!boxAdd)}>
                                 <FontAwesome name='user-plus' size={20} color="#037D25" />
                             </TouchableOpacity>
                         }
@@ -144,7 +182,7 @@ export default function Grupos(){
                                 <FontAwesome name='edit' size={20} color="#000000" />
                             </TouchableOpacity>
                         }
-                        {(gruposusuario.status === "Em Aberto") &&
+                        {(gruposusuario.status === "Em Aberto") && 
                             <TouchableOpacity onPress={() => sortear(gruposusuario._id)}>
                                 <FontAwesome name='random' size={20} color="#000000" />
                             </TouchableOpacity>
@@ -165,6 +203,24 @@ export default function Grupos(){
                     </View>
             </View>
 
+            {boxAdd &&
+                <View style={styles.menuAdd}>
+                        <View style={styles.adicionar}>
+                        <TextInput 
+                            style={styles.input}
+                            keyboardType='email-address'
+                            placeholder="Email novo participante"
+                            returnKeyType='next'
+                            value={emailParticipante}
+                            onChangeText={(text) => setEmailParticipante(text)}
+                        />
+                        <TouchableOpacity onPress={() => addParticipante(emailParticipante)}>
+                        <Text style={styles.btnAdicionar}>Adicionar</Text>    
+                            </TouchableOpacity>
+                        </View>
+                </View>
+            }
+
             <FlatList 
                 style={styles.ListaGrupos}
                 data={gruposusuario.participantes}
@@ -176,7 +232,7 @@ export default function Grupos(){
                     <Text style={styles.participanteNome}>{participante.nome}</Text>
                     <Text style={styles.data}>{participante.email}</Text>
                     {(gruposusuario.status === "Em Aberto") &&
-                        <TouchableOpacity onPress={() => {}}>
+                        <TouchableOpacity onPress={() => {removeParticipante(participante.email)}}>
                             <FontAwesome style={styles.iconeRemover} name='user-times' size={20} color='#B32923' />
                         </TouchableOpacity>
                     }

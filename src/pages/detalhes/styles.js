@@ -54,4 +54,25 @@ export default StyleSheet.create({
         justifyContent:'space-around'
 
     },
+    menuAdd:{
+        padding:10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        marginTop: 10,
+    },
+    input:{
+        marginTop: 15,
+        backgroundColor:'white',
+        padding: 10,
+        borderRadius: 10,
+
+    },
+    btnAdicionar:{
+        backgroundColor:'green',
+        color: 'white',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        padding: 5,
+        borderRadius: 5
+    }
 })
