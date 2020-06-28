@@ -7,6 +7,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import styles from './styles';
 import Icone from '../../assets/icone.png';
 import api from '../../services/api';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function NewGrupo(){
     const navigation = useNavigation();
@@ -57,7 +58,7 @@ export default function NewGrupo(){
         }
     }
     return(
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.nomeBold}>
                     Amigo 
@@ -153,6 +154,6 @@ export default function NewGrupo(){
                     <FontAwesome name='sign-out' size={25} color="#FFFFFF" />
                 </TouchableOpacity>  
             </View>
-        </View>
+        </ScrollView>
     )
 }
